@@ -20,7 +20,7 @@ export const clientLoader = async ({ request, params }: Route.LoaderArgs): Promi
         title: project.title,
         description: project.description,
         image: project.image?.url
-            ? `${import.meta.env.VITE_STRAPI_URL}${project.image.url}`
+            ? project.image.url
             : '/images/no-image.png',
         url: project.url,
         date: project.date,

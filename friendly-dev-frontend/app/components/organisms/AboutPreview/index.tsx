@@ -4,7 +4,7 @@ const AboutPreview = () => {
   return (
     <section className='mt-12 p-10 flex flex-col md:flex-row items-center gap-8 bg-gray-900'>
       <img
-        src='/images/profile.jpg'
+        src='/images/profile.jpeg'
         alt='profile'
         className='w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-md'
       />

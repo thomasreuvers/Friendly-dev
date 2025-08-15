@@ -23,7 +23,7 @@ export const loader = async ({ request }: Route.LoaderArgs): Promise<{ posts: Po
         slug: item.slug,
         body: item.body,
         image: item.image?.url
-            ? `${import.meta.env.VITE_STRAPI_URL}${item.image.url}`
+            ? item.image.url
             : '/images/no-image.png',
     }));
 

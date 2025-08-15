@@ -22,7 +22,7 @@ const fetchPosts = async (request: Request): Promise<PostMeta[]> => {
         slug: item.slug,
         body: item.body,
         image: item.image?.url
-            ? `${import.meta.env.VITE_STRAPI_URL}${item.image.url}`
+            ? item.image.url
             : '/images/no-image.png',
     }));
 
@@ -44,7 +44,7 @@ const fetchProjects = async (): Promise<Project[]> => {
         title: item.title,
         description: item.description,
         image: item.image?.url
-            ? `${import.meta.env.VITE_STRAPI_URL}${item.image.url}`
+            ? item.image.url
             : '/images/no-image.png',
         url: item.url,
         date: item.date,
