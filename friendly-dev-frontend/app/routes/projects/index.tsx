@@ -1,4 +1,4 @@
-import type { Project } from '~/types';
+import type { Project, StrapiProject, StrapiResponse } from '~/types';
 import type { Route } from './+types/index';
 import ProjectCard from '~/components/organisms/ProjectCard';
 import ItemGrid from '~/components/organisms/ItemGrid';
@@ -17,11 +17,29 @@ export const loader = async ({
 }: Route.LoaderArgs): Promise<{
     projects: Project[]
 }> => {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/projects`);
-    const data = await response.json();
-    return {
-        projects: data
-    };
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/projects?populate=*`);
+
+    if (!response.ok) {
+        throw new Response('Failed to fetch projects', { status: 404 });
+    }
+
+    const json: StrapiResponse<StrapiProject> = await response.json();
+
+    const projects = json.data.map((item) => ({
+        id: item.id,
+        documentId: item.documentId,
+        title: item.title,
+        description: item.description,
+        image: item.image?.url
+            ? `${import.meta.env.VITE_STRAPI_URL}${item.image.url}`
+            : '/images/no-image.png',
+        url: item.url,
+        date: item.date,
+        category: item.category,
+        featured: item.featured
+    }));
+
+    return { projects }
 }
 
 const ProjectsPages = ({ loaderData }: Route.ComponentProps) => {

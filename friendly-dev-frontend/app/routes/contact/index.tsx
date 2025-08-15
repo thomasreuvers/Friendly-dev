@@ -10,8 +10,6 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const subject = formData.get("subject");
     const message = formData.get("message");
 
-    console.log({ name, email, subject, message });
-
     const errors: Record<string, string> = {};
 
     if (!name) {

@@ -1,48 +1,58 @@
-import type { PostMeta } from '~/types';
+import type { PostMeta, StrapiPost, StrapiResponse } from '~/types';
 import type { Route } from './+types/index';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router';
+import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 
-export const clientLoader = async ({ request, params }: Route.LoaderArgs): Promise<{ postMeta: PostMeta; markdown: string }> => {
+export const clientLoader = async ({ request, params }: Route.LoaderArgs): Promise<{ post: PostMeta }> => {
     const { slug } = params;
-    const url = new URL('/posts-meta.json', request.url);
-    const response = await fetch(url.href);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/posts?filters[slug][$eq]=${slug}&populate=*`);
 
     if (!response.ok) {
         throw new Response('Failed to fetch post');
     }
 
-    const index = await response.json();
-    const postMeta = index.find((post: PostMeta) => post.slug === slug);
+    const json: StrapiResponse<any> = await response.json();
 
-    if (!postMeta) {
-        throw new Response('Not Found', { status: 404 });
-    }
+    const item = json.data[0];
 
-    const markdown = await import(`../../../posts/${slug}.md?raw`);
+    const post: PostMeta = {
+        id: item.id,
+        documentId: item.documentId,
+        title: item.title,
+        date: item.date,
+        excerpt: item.excerpt,
+        image: item.image?.url
+            ? `${import.meta.env.VITE_STRAPI_URL}${item.image.url}`
+            : '/images/no-image.png',
+        slug: item.slug,
+        body: item.body
+    };
 
     return { 
-        postMeta,
-        markdown: markdown.default
+        post
     };
 }
 
 const BlogPostDetailsPage = ({ loaderData }: Route.ComponentProps) => {
-    const { postMeta, markdown } = loaderData || {};
+    const { post } = loaderData || {};
 
     return (
         <div className='max-w-3xl mx-auto px-6 py-12 bg-gray-900'>
             <h1 className='text-3xl font-bold text-blue-400 mb-2'>
-                {postMeta?.title}
+                {post?.title}
             </h1>
             <p className="text-sm text-gray-400 mb-6">
-                {new Date(postMeta?.date).toDateString()}
+                {new Date(post?.date).toDateString()}
             </p>
 
+            <img src={post?.image} alt={post?.title} className="w-full h-64 object-cover mb-4" />
+
             <div className="prose prose-invert max-w-none mb-12">
-                <ReactMarkdown>
-                    {markdown}
-                </ReactMarkdown>
+                <BlocksRenderer content={post?.body} />
+                {/* <ReactMarkdown>
+                    {post?.body}
+                </ReactMarkdown> */}
             </div>
 
             <Link to={'/blog'} className='inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition'>
